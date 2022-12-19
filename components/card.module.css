@@ -23,6 +23,7 @@
 .cardHeaderWrapper {
   margin-top: 0.75rem /* 12px */;
   margin-bottom: 0.75rem /* 12px */;
+  max-width: min-content;
 }
 
 .cardHeader {
@@ -37,6 +38,7 @@
 
 .cardImageWrapper {
   color: var(--text-white-100);
+  max-width: min-content;
 }
 
 .cardImage {
