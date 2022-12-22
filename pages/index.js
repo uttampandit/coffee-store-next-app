@@ -2,11 +2,16 @@ import Head from "next/head";
 import Image from "next/image";
 import Banner from "../components/banner";
 import Card from "../components/card";
+import { getCoffeeStore } from "../lib/coffee-store";
 import styles from "../styles/Home.module.css";
 
-import coffeestore from "../data/data.json";
-
 export async function getStaticProps(context) {
+  let coffeestore = [];
+  try {
+    coffeestore = await getCoffeeStore(28.74866467846766, 77.04733444406916);
+  } catch (e) {
+    console.log("error", e);
+  }
   return {
     props: {
       coffeestore,
@@ -31,9 +36,9 @@ export default function Home(props) {
         <div className={styles.heroImage}>
           <Image src="/static/hero-image.png" height={400} width={700} />
         </div>
-        {coffeestore.length > 0 && (
+        {props.coffeestore.length > 0 && (
           <>
-            <h2 className={styles.heading2}>Toronto Stores</h2>
+            <h2 className={styles.heading2}>Delhi Stores</h2>
             <div className={styles.cardLayout}>
               {props.coffeestore.map((store) => (
                 <Card

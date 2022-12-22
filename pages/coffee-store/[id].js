@@ -2,11 +2,13 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { getCoffeeStore } from "../../lib/coffee-store";
 
-import coffeeStoreData from "../../data/data.json";
 import styles from "../../styles/coffee-store.module.css";
-
+let coffeeStoreData = [];
 export async function getStaticProps(context) {
+  coffeeStoreData = await getCoffeeStore();
+  console.log(coffeeStoreData);
   return {
     props: {
       coffestore: coffeeStoreData.find((store) => {
@@ -34,7 +36,7 @@ const DynamicPage = (params) => {
   if (router.isFallback) {
     return <div>Its loading... Please wait..</div>;
   }
-  const { name, address, neighbourhood, imgUrl } = params.coffestore;
+  const { name, address, neighborhood, imgUrl } = params.coffestore;
   const upVoteHandler = () => {
     console.log("Upvoted!");
   };
@@ -54,8 +56,8 @@ const DynamicPage = (params) => {
           <Image
             className={styles.storeImg}
             src={imgUrl}
-            height={600}
-            width={360}
+            width={600}
+            height={360}
             alt={name}
           />
         </div>
@@ -64,10 +66,14 @@ const DynamicPage = (params) => {
             <Image src="/static/icons/location.svg" width={24} height={24} />
             <p className={styles.text}>{address}</p>
           </div>
-          <div className={styles.iconWrapper}>
-            <Image src="/static/icons/nearMe.svg" width={24} height={24} />
-            <p className={styles.text}>{neighbourhood}</p>
-          </div>
+          {neighborhood ? (
+            <div className={styles.iconWrapper}>
+              <Image src="/static/icons/nearMe.svg" width={24} height={24} />
+              <p className={styles.text}>{neighborhood}</p>
+            </div>
+          ) : (
+            ""
+          )}
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width={24} height={24} />
             <p className={styles.text}>{1}</p>
