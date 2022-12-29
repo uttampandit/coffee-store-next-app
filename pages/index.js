@@ -2,16 +2,18 @@ import Head from "next/head";
 import Image from "next/image";
 import Banner from "../components/banner";
 import Card from "../components/card";
+import useLocation from "../hooks/use-location";
 import { getCoffeeStore } from "../lib/coffee-store";
 import styles from "../styles/Home.module.css";
+
+import { useContext, useEffect } from "react";
+import { action_type, CoffeeContext } from "../context/coffee-store";
 
 export async function getStaticProps(context) {
   let coffeestore = [];
   try {
-    coffeestore = await getCoffeeStore(28.74866467846766, 77.04733444406916);
-  } catch (e) {
-    console.log("error", e);
-  }
+    coffeestore = await getCoffeeStore();
+  } catch (e) {}
   return {
     props: {
       coffeestore,
@@ -20,9 +22,31 @@ export async function getStaticProps(context) {
 }
 
 export default function Home(props) {
+  const { errorMsg, getLocation, isLoading } = useLocation();
+  const { state, dispatch } = useContext(CoffeeContext);
+  const { coffeeStores, latLong } = state;
+
   const bannerClickHandler = () => {
     console.log("Button clicked");
+    getLocation();
   };
+  useEffect(() => {
+    const getCoffee = async () => {
+      try {
+        const coffeeStores = await getCoffeeStore(latLong, 30);
+        dispatch({
+          type: action_type.SET_COFFEE_STORE,
+          payload: coffeeStores,
+        });
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    if (latLong) {
+      getCoffee();
+    }
+  }, [latLong]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -32,12 +56,32 @@ export default function Home(props) {
       </Head>
 
       <main className={styles.main}>
-        <Banner text="Find nearby shops" onClickHandler={bannerClickHandler} />
+        <Banner
+          text={isLoading ? "Getting location..." : "Find nearby shops"}
+          onClickHandler={bannerClickHandler}
+        />
+        {errorMsg ? <p>Oops! Something went wrong!:{errorMsg}</p> : ""}
         <div className={styles.heroImage}>
           <Image src="/static/hero-image.png" height={400} width={700} />
         </div>
+        {coffeeStores.length > 0 && (
+          <div className={styles.sectionWrapper}>
+            <h2 className={styles.heading2}>Nearby Stores</h2>
+            <div className={styles.cardLayout}>
+              {coffeeStores.map((store) => (
+                <Card
+                  name={store.name}
+                  href={`/coffee-store/${store.id}`}
+                  imgUrl={store.imgUrl}
+                  key={store.id}
+                  className={styles.card}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         {props.coffeestore.length > 0 && (
-          <>
+          <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Delhi Stores</h2>
             <div className={styles.cardLayout}>
               {props.coffeestore.map((store) => (
@@ -50,7 +94,7 @@ export default function Home(props) {
                 />
               ))}
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>
