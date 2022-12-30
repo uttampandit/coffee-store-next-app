@@ -2,18 +2,22 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
+import { CoffeeContext } from "../../context/coffee-store";
 import { getCoffeeStore } from "../../lib/coffee-store";
 
 import styles from "../../styles/coffee-store.module.css";
+import isEmpty from "../../utils/isEmpty";
 let coffeeStoreData = [];
 export async function getStaticProps(context) {
   coffeeStoreData = await getCoffeeStore();
-  console.log(coffeeStoreData);
+  const store = coffeeStoreData.find((store) => {
+    return store.id.toString() === context.params.id;
+  });
+
   return {
     props: {
-      coffestore: coffeeStoreData.find((store) => {
-        return store.id.toString() === context.params.id;
-      }),
+      coffestore: store ? store : {},
     }, // will be passed to the page component as props
   };
 }
@@ -33,10 +37,27 @@ export async function getStaticPaths() {
 
 const DynamicPage = (params) => {
   const router = useRouter();
+  const id = router.query.id;
+  const { state } = useContext(CoffeeContext);
   if (router.isFallback) {
     return <div>Its loading... Please wait..</div>;
   }
-  const { name, address, neighborhood, imgUrl } = params.coffestore;
+  const [coffeeStore, setCoffeeStore] = useState(params.coffestore || {});
+
+  useEffect(() => {
+    if (isEmpty(params.coffestore)) {
+      if (state.coffeeStores.length > 0) {
+        const coffeestore = state.coffeeStores.find((store) => {
+          return store.id === id;
+        });
+        setCoffeeStore(coffeestore);
+      }
+    } else {
+      setCoffeeStore(params.coffestore);
+    }
+  }, [id, params.coffestore, state.coffeeStores]);
+
+  let { name, address, neighborhood, imgUrl } = coffeeStore;
   const upVoteHandler = () => {
     console.log("Upvoted!");
   };
