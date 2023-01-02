@@ -102,6 +102,7 @@ const DynamicPage = (params) => {
     <div className={styles.layout}>
       <Head>
         <title>{name}</title>
+        <meta name="description" content={name} />
       </Head>
       <div className={styles.container}>
         <div className={styles.col1}>
@@ -121,19 +122,34 @@ const DynamicPage = (params) => {
         </div>
         <div className={"glass " + styles.col2}>
           <div className={styles.iconWrapper}>
-            <Image src="/static/icons/location.svg" width={24} height={24} />
+            <Image
+              src="/static/icons/location.svg"
+              width={24}
+              height={24}
+              alt="Location Icon"
+            />
             <p className={styles.text}>{address}</p>
           </div>
           {neighborhood ? (
             <div className={styles.iconWrapper}>
-              <Image src="/static/icons/nearMe.svg" width={24} height={24} />
+              <Image
+                src="/static/icons/nearMe.svg"
+                width={24}
+                height={24}
+                alt="NearMe Icon"
+              />
               <p className={styles.text}>{neighborhood}</p>
             </div>
           ) : (
             ""
           )}
           <div className={styles.iconWrapper}>
-            <Image src="/static/icons/star.svg" width={24} height={24} />
+            <Image
+              src="/static/icons/star.svg"
+              width={24}
+              height={24}
+              alt="Star Icon"
+            />
             <p className={styles.text}>{vote}</p>
           </div>
           <button className={styles.upvoteButton} onClick={upVoteHandler}>
