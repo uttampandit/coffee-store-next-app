@@ -8,7 +8,9 @@ import { CoffeeContext } from "../../context/coffee-store";
 import { getCoffeeStore } from "../../lib/coffee-store";
 
 import styles from "../../styles/coffee-store.module.css";
+import { fetcher } from "../../utils/fetcher";
 import isEmpty from "../../utils/isEmpty";
+import useSWR from "swr";
 let coffeeStoreData = [];
 export async function getStaticProps(context) {
   coffeeStoreData = await getCoffeeStore();
@@ -36,26 +38,34 @@ export async function getStaticPaths() {
   };
 }
 const createCoffeeStore = async (coffeestore) => {
-  let { id, name, address, neighborhood: neighbourhood, imgUrl } = coffeestore;
-  const res = await axios.post("/api/createCoffeeStore", {
-    id,
-    name,
-    address: address || "",
-    neighbourhood: neighbourhood || "",
-    imgUrl,
-    vote: 0,
-  });
+  if (coffeestore) {
+    let {
+      id,
+      name,
+      address,
+      neighborhood: neighbourhood,
+      imgUrl,
+    } = coffeestore;
+    const res = await axios.post("/api/createCoffeeStore", {
+      id,
+      name,
+      address: address || "",
+      neighbourhood: neighbourhood || "",
+      imgUrl,
+      vote: 0,
+    });
+  }
 };
 
 const DynamicPage = (params) => {
   const router = useRouter();
   const id = router.query.id;
   const { state } = useContext(CoffeeContext);
-
   const [coffeeStore, setCoffeeStore] = useState(params.coffestore || {});
-
+  let { name, address, neighborhood, imgUrl } = coffeeStore;
+  const [vote, setVote] = useState(0);
+  console.log(coffeeStore);
   useEffect(() => {
-    console.log("useEffect ran");
     if (isEmpty(params.coffestore)) {
       if (state.coffeeStores.length > 0) {
         const coffeestore = state.coffeeStores.find((store) => {
@@ -67,14 +77,31 @@ const DynamicPage = (params) => {
     } else {
       createCoffeeStore(params.coffestore);
     }
-  }, []);
+  }, [id, params.coffeestore, state.coffeeStores]);
+  console.log({ id });
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
+  console.log({ data, error });
+  if (error) {
+    console.log("error from swr", error);
+  }
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setCoffeeStore(data[0]);
+      setVote(data[0].vote);
+    }
+  }, [data]);
 
-  let { name, address, neighborhood, imgUrl } = coffeeStore;
   if (router.isFallback) {
     return <div>Its loading... Please wait..</div>;
   }
-  const upVoteHandler = () => {
+  const upVoteHandler = async () => {
     console.log("Upvoted!");
+    const res = await axios.put("/api/upvoteCoffeeStore", {
+      id,
+    });
+    if (res) {
+      setVote((val) => val + 1);
+    }
   };
   return (
     <div className={styles.layout}>
@@ -112,7 +139,7 @@ const DynamicPage = (params) => {
           )}
           <div className={styles.iconWrapper}>
             <Image src="/static/icons/star.svg" width={24} height={24} />
-            <p className={styles.text}>{1}</p>
+            <p className={styles.text}>{vote}</p>
           </div>
           <button className={styles.upvoteButton} onClick={upVoteHandler}>
             Up vote!
