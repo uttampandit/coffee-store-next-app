@@ -29,7 +29,6 @@ const getCoffeeStoreById = async (req, res) => {
   } catch (error) {
     res.status(500);
     res.json({ error });
-    console.log(error.message);
   }
 };
 
