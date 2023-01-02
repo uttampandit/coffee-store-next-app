@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "airtable": "^0.11.6",
     "axios": "^1.2.1",
     "next": "13.0.6",
     "nextjs-cors": "^2.1.2",

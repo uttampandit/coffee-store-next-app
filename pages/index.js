@@ -8,6 +8,8 @@ import styles from "../styles/Home.module.css";
 
 import { useContext, useEffect } from "react";
 import { action_type, CoffeeContext } from "../context/coffee-store";
+import getCoffeeStoreByLocation from "./api/getCoffeeStoreByLocation";
+import axios from "axios";
 
 export async function getStaticProps(context) {
   let coffeestore = [];
@@ -33,7 +35,10 @@ export default function Home(props) {
   useEffect(() => {
     const getCoffee = async () => {
       try {
-        const coffeeStores = await getCoffeeStore(latLong, 30);
+        const res = await axios.get(
+          `api/getCoffeeStoreByLocation?latLong=${latLong}`
+        );
+        const coffeeStores = res.data;
         dispatch({
           type: action_type.SET_COFFEE_STORE,
           payload: coffeeStores,

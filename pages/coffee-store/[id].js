@@ -1,3 +1,4 @@
+import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,30 +35,44 @@ export async function getStaticPaths() {
     fallback: true,
   };
 }
+const createCoffeeStore = async (coffeestore) => {
+  let { id, name, address, neighborhood: neighbourhood, imgUrl } = coffeestore;
+  const res = await axios.post("/api/createCoffeeStore", {
+    id,
+    name,
+    address: address || "",
+    neighbourhood: neighbourhood || "",
+    imgUrl,
+    vote: 0,
+  });
+};
 
 const DynamicPage = (params) => {
   const router = useRouter();
   const id = router.query.id;
   const { state } = useContext(CoffeeContext);
-  if (router.isFallback) {
-    return <div>Its loading... Please wait..</div>;
-  }
+
   const [coffeeStore, setCoffeeStore] = useState(params.coffestore || {});
 
   useEffect(() => {
+    console.log("useEffect ran");
     if (isEmpty(params.coffestore)) {
       if (state.coffeeStores.length > 0) {
         const coffeestore = state.coffeeStores.find((store) => {
           return store.id === id;
         });
         setCoffeeStore(coffeestore);
+        createCoffeeStore(coffeestore);
       }
     } else {
-      setCoffeeStore(params.coffestore);
+      createCoffeeStore(params.coffestore);
     }
-  }, [id, params.coffestore, state.coffeeStores]);
+  }, []);
 
   let { name, address, neighborhood, imgUrl } = coffeeStore;
+  if (router.isFallback) {
+    return <div>Its loading... Please wait..</div>;
+  }
   const upVoteHandler = () => {
     console.log("Upvoted!");
   };
