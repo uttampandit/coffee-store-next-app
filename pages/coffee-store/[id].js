@@ -64,7 +64,7 @@ const DynamicPage = (params) => {
   const [coffeeStore, setCoffeeStore] = useState(params.coffestore || {});
   let { name, address, neighborhood, imgUrl } = coffeeStore;
   const [vote, setVote] = useState(0);
-  console.log(coffeeStore);
+
   useEffect(() => {
     if (isEmpty(params.coffestore)) {
       if (state.coffeeStores.length > 0) {
@@ -78,12 +78,8 @@ const DynamicPage = (params) => {
       createCoffeeStore(params.coffestore);
     }
   }, [id, params.coffeestore, state.coffeeStores]);
-  console.log({ id });
+
   const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
-  console.log({ data, error });
-  if (error) {
-    console.log("error from swr", error);
-  }
   useEffect(() => {
     if (data && data.length > 0) {
       setCoffeeStore(data[0]);
@@ -92,10 +88,9 @@ const DynamicPage = (params) => {
   }, [data]);
 
   if (router.isFallback) {
-    return <div>Its loading... Please wait..</div>;
+    return <div className={styles.wait}>Its loading... Please wait..</div>;
   }
   const upVoteHandler = async () => {
-    console.log("Upvoted!");
     const res = await axios.put("/api/upvoteCoffeeStore", {
       id,
     });

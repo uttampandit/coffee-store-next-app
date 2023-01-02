@@ -29,7 +29,6 @@ export default function Home(props) {
   const { coffeeStores, latLong } = state;
 
   const bannerClickHandler = () => {
-    console.log("Button clicked");
     getLocation();
   };
   useEffect(() => {
@@ -44,7 +43,7 @@ export default function Home(props) {
           payload: coffeeStores,
         });
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
       }
     };
     if (latLong) {
